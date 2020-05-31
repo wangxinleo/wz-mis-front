@@ -1,8 +1,15 @@
 import request from "@/utils/request";
 
-export function getList(data) {
+export function getGZLList(data) {
   return request({
-    url: "/Rwl/getList",
+    url: "/Rwl/getGZLList",
+    method: "post",
+    data,
+  });
+}
+export function getCY(data) {
+  return request({
+    url: "/Rwl/getCY",
     method: "post",
     data,
   });
