@@ -53,6 +53,11 @@
           </div>
         </el-card>
       </el-col>
+      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+        <el-card>
+          欢迎来到MIS辅助管理系统
+        </el-card>
+      </el-col>
     </el-row>
   </div>
 </template>

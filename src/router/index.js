@@ -54,47 +54,54 @@ export const asyncRoutes = [
           noKeepAlive: true,
         },
       },
-      // {
-      //   path: "/MISComputers",
-      //   name: "MISComputers",
-      //   component: () => import("@/views/project/MISComputers/index"),
-      //   meta: {
-      //     title: "东莞资讯部",
-      //     icon: "biohazard",
-      //     affix: true,
-      //     noKeepAlive: true,
-      //   },
-      // },
     ],
   },
   {
-    path: "/MIS",
+    path: "/MISreads",
     component: Layout,
     redirect: "noRedirect",
-    name: "MIS",
+    children: [
+      {
+        path: "/MISreads",
+        name: "MISreads",
+        component: () => import("@/views/project/MISreads/index"),
+        meta: {
+          title: "MIS权限查询",
+          icon: "book-reader",
+          permissions: ["admin"],
+        },
+        children: null,
+      },
+    ],
+  },
+  {
+    path: "/MISedits",
+    component: Layout,
+    redirect: "noRedirect",
+    name: "MISedits",
     meta: {
-      title: "哟吼",
-      icon: "biohazard",
+      title: "MIS权限新增",
+      icon: "user-edit",
       permissions: ["admin"],
     },
 
     children: [
       {
-        path: "computers",
-        name: "Computers",
-        component: () => import("@/views/project/MISComputers/index"),
+        path: "MISFile",
+        name: "MISFile",
+        component: () => import("@/views/project/MISreads/index"),
         meta: {
-          title: "电脑",
+          title: "MIS档案上传",
           noKeepAlive: true,
         },
         children: null,
       },
       {
-        path: "computers2",
-        name: "Computers2",
-        component: () => import("@/views/project/MISComputers/index"),
+        path: "MISmobile",
+        name: "MISmobile",
+        component: () => import("@/views/project/MISreads/index"),
         meta: {
-          title: "电脑2",
+          title: "申请功能机",
           noKeepAlive: true,
         },
         children: null,
