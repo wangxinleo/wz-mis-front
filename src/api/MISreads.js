@@ -8,6 +8,22 @@ export function getEmpData(data) {
   });
 }
 
+export function getFilesData(data) {
+  return request({
+    url: "/MISreads/getFilesData",
+    method: "post",
+    data,
+  });
+}
+
+export function getPhonesData(data) {
+  return request({
+    url: "/MISreads/getPhonesData",
+    method: "post",
+    data,
+  });
+}
+
 export function doEdit(data) {
   return request({
     url: "/MISreads/doEdit",

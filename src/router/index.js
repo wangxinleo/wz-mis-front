@@ -57,30 +57,68 @@ export const asyncRoutes = [
     ],
   },
   {
-    path: "/MISreads",
+    path: "/MIS",
     component: Layout,
     redirect: "noRedirect",
+    name: "MIS",
+    meta: {
+      title: "MIS相关",
+      icon: "user-edit",
+      permissions: ["admin"],
+    },
     children: [
       {
-        path: "/MISreads",
+        path: "MISreads",
         name: "MISreads",
         component: () => import("@/views/project/MISreads/index"),
         meta: {
-          title: "MIS权限查询",
+          title: "统一查询入口",
           icon: "book-reader",
           permissions: ["admin"],
         },
         children: null,
       },
+      {
+        path: "MISedits",
+        component: EmptyLayout,
+        name: "MISedits",
+        meta: {
+          title: "信息录入",
+          icon: "book-reader",
+          permissions: ["admin"],
+        },
+        children: [
+          {
+            path: "MISFile",
+            name: "MISFile",
+            component: () => import("@/views/project/MISFile/index"),
+            meta: {
+              title: "MIS档案上传",
+              noKeepAlive: true,
+            },
+            children: null,
+          },
+          {
+            path: "MISmobile",
+            name: "MISmobile",
+            component: () => import("@/views/project/MISmobile/index"),
+            meta: {
+              title: "申请功能机",
+              noKeepAlive: true,
+            },
+            children: null,
+          },
+        ],
+      },
     ],
   },
   {
-    path: "/MISedits",
+    path: "/OAquick",
     component: Layout,
     redirect: "noRedirect",
-    name: "MISedits",
+    name: "OAquick",
     meta: {
-      title: "MIS权限新增",
+      title: "OA快速维护",
       icon: "user-edit",
       permissions: ["admin"],
     },

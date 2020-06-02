@@ -4,7 +4,7 @@
       <el-col :xs="24" :sm="24" :md="8" :lg="6" :xl="4">
         <el-card>
           <el-form
-            ref="MISReadsFormRef"
+            ref="MISReadsForm"
             :model="MISReadsForm"
             :rules="MISReadsFormRules"
             label-width="100px"
@@ -61,9 +61,6 @@
                       <el-form-item label="所任职务">
                         <span>{{ scope.row.empPosition }}</span>
                       </el-form-item>
-                      <el-form-item label="所属部门">
-                        <span>{{ scope.row.empDep }}</span>
-                      </el-form-item>
                       <el-form-item label="联系电话">
                         <span>{{ scope.row.tel }}</span>
                       </el-form-item>
@@ -80,6 +77,8 @@
                 <el-table-column prop="empNum" label="工号" width="100">
                 </el-table-column>
                 <el-table-column prop="empName" label="姓名" width="100">
+                </el-table-column>
+                <el-table-column prop="empDep" label="部门" width="150">
                 </el-table-column>
                 <el-table-column prop="comCode" label="电脑编号" width="150">
                 </el-table-column>
@@ -100,11 +99,83 @@
                     >
                   </template>
                 </el-table-column>
-                <el-table-column prop="ill" label="	其他说明"> </el-table-column>
+                <el-table-column
+                  show-overflow-tooltip
+                  prop="ill"
+                  label="	其他说明"
+                >
+                </el-table-column>
               </el-table>
             </el-tab-pane>
-            <el-tab-pane label="纸质档案记录">纸质档案记录</el-tab-pane>
-            <el-tab-pane label="功能机领取记录">功能机领取记录</el-tab-pane>
+            <el-tab-pane label="纸质档案记录">
+              <el-table
+                :data="filesData"
+                style="width: 100%;"
+                border
+                stripe
+                height="600"
+              >
+                <el-table-column type="index" label="#"></el-table-column>
+                <el-table-column prop="path" label="匹配记录">
+                  <template slot-scope="scope">
+                    <a :href="scope.row.path">{{ scope.row.name }}</a>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-tab-pane>
+            <el-tab-pane label="功能机领取记录">
+              <el-table
+                :data="phonesData"
+                style="width: 100%;"
+                border
+                stripe
+                height="600"
+              >
+                <el-table-column type="index" label="#"></el-table-column>
+                <el-table-column prop="empNum" label="工号" width="100">
+                </el-table-column>
+                <el-table-column prop="empName" label="姓名" width="100">
+                </el-table-column>
+                <el-table-column prop="area" label="所属厂" width="100">
+                </el-table-column>
+                <el-table-column prop="empDep" label="部门" width="150">
+                </el-table-column>
+                <el-table-column prop="longTel" label="长号" width="150">
+                </el-table-column>
+                <el-table-column prop="shortTel" label="短号" width="100">
+                </el-table-column>
+                <el-table-column prop="status" label="状态" width="100">
+                  <template slot-scope="scope">
+                    <el-tag v-if="scope.row.status === 0" type="danger"
+                      >已发出</el-tag
+                    >
+                    <el-tag v-if="scope.row.status === 1" type="success"
+                      >已退回</el-tag
+                    >
+
+                    <el-tag v-if="scope.row.status === 2" type="warning"
+                      >其他</el-tag
+                    >
+                  </template>
+                </el-table-column>
+                <el-table-column show-overflow-tooltip prop="ill" label="备注">
+                </el-table-column>
+                <el-table-column label="操作" width="150">
+                  <template slot-scope="scope">
+                    <el-button
+                      icon="el-icon-edit"
+                      size="mini"
+                      @click="alert(scope.row.empNum)"
+                    ></el-button>
+                    <el-button
+                      type="danger"
+                      icon="el-icon-delete-solid"
+                      size="mini"
+                    ></el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-tab-pane>
             <el-tab-pane disabled label="电脑档案记录"
               >电脑档案记录</el-tab-pane
             >
@@ -116,7 +187,7 @@
 </template>
 
 <script>
-import { getEmpData } from "@/api/MISreads";
+import { getEmpData, getFilesData, getPhonesData } from "@/api/MISreads";
 export default {
   name: "Misreads",
   components: {},
@@ -131,6 +202,8 @@ export default {
         ],
       },
       OAMISData: [],
+      filesData: [],
+      phonesData: [],
     };
   },
   created() {},
@@ -138,26 +211,77 @@ export default {
   methods: {
     // 清空输入框
     clearEmpText() {
-      this.MISReadsForm.empText = "";
+      this.$refs.MISReadsForm.resetFields();
     },
     // 提交查询
     submitEmpText() {
-      this.$refs.MISReadsFormRef.validate((validate) => {
+      this.$refs.MISReadsForm.validate((validate) => {
         if (!validate) return false;
         const empData = this.MISReadsForm.empText.split("\n");
         this.getEmpData(empData);
+        this.getFilesData(empData);
+        this.getPhonesData(empData);
       });
+    },
+    // 查询结果提示
+    newTips(element, status = "") {
+      if (status === "delete") {
+        $("#" + element + ' [class="newTip"]').remove();
+      } else {
+        if ($("#" + element + ' [class="newTip"]').length == 0) {
+          var html = document.getElementById(element).innerHTML;
+          document.getElementById(element).innerHTML =
+            html + "<span class='newTip' style='color:red'>*</span>";
+        }
+      }
     },
     /**
      * 网络请求
      */
 
     // 查询权限信息
-    getEmpData() {
-      getEmpData().then((res) => {
+    getEmpData(data) {
+      getEmpData(data).then((res) => {
         console.log(res);
-
+        if (res.code !== 200) {
+          return Vue.prototype.$baseMessage(res.msg, "error");
+        }
+        if (res.data.length === 0) {
+          this.newTips("tab-0", "delete");
+        }
+        // 新查询结果提示
+        this.newTips("tab-0");
         this.OAMISData = res.data;
+      });
+    },
+    // 查询纸质档案
+    getFilesData(data) {
+      getFilesData(data).then((res) => {
+        console.log(res);
+        if (res.code !== 200) {
+          return Vue.prototype.$baseMessage(res.msg, "error");
+        }
+        if (res.data.length === 0) {
+          this.newTips("tab-1", "delete");
+        }
+        // 新查询结果提示
+        this.newTips("tab-1");
+        this.filesData = res.data;
+      });
+    },
+    // 查询功能机发放记录
+    getPhonesData(data) {
+      getPhonesData(data).then((res) => {
+        console.log(res);
+        if (res.code !== 200) {
+          return Vue.prototype.$baseMessage(res.msg, "error");
+        }
+        if (res.data.length === 0) {
+          this.newTips("tab-2", "delete");
+        }
+        // 新查询结果提示
+        this.newTips("tab-2");
+        this.phonesData = res.data;
       });
     },
   },

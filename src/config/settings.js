@@ -10,7 +10,7 @@ module.exports = {
   // 进行编译的依赖
   transpileDependencies: ["vue-echarts", "resize-detector"],
   //标题 （包括初次加载雪花屏的标题 页面的标题 浏览器的标题）
-  title: "MIS查询系统",
+  title: "OA辅助系统",
   //简写
   abbreviation: "vab",
   //开发环境端口号
