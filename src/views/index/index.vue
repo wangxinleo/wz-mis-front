@@ -4,7 +4,7 @@
       <el-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
         <el-card shadow="never">
           <div slot="header">
-            <span>日均任务量</span>
+            <span>MIS流程统计</span>
           </div>
           <byui-chart
             :autoresize="true"
@@ -13,7 +13,7 @@
           />
           <div class="bottom">
             <span
-              >日均任务量:
+              >月均任务量:
 
               <byui-count
                 :start-val="config1.startVal"
@@ -31,7 +31,7 @@
       <el-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
         <el-card shadow="never">
           <div slot="header">
-            <span>热词检索</span>
+            <span>热点流程</span>
           </div>
           <byui-chart
             :autoresize="true"
@@ -41,7 +41,7 @@
           />
           <div class="bottom">
             <span
-              >热点数量:<byui-count
+              >近期归档量:<byui-count
                 :start-val="config3.startVal"
                 :end-val="config3.endVal"
                 :duration="config3.duration"
@@ -78,7 +78,7 @@ export default {
       nodeEnv: process.env.NODE_ENV,
       config1: {
         startVal: 0,
-        endVal: this.$baseLodash.random(2, 200),
+        endVal: 0,
         decimals: 0,
         prefix: "",
         suffix: "",
@@ -87,7 +87,7 @@ export default {
       },
       config3: {
         startVal: 0,
-        endVal: this.$baseLodash.random(1000, 20000),
+        endVal: 0,
         decimals: 0,
         prefix: "",
         suffix: "",
@@ -112,12 +112,14 @@ export default {
       getGZLList().then((res) => {
         console.log(res);
         this.fwl = res.data;
+        this.config1.endVal = res.totalCount;
       });
     },
     getCY() {
       getCY().then((res) => {
         console.log(res);
         this.cy = res.data;
+        this.config3.endVal = res.totalCount;
       });
     },
   },

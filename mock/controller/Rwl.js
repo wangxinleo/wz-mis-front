@@ -18,28 +18,21 @@ export default [
               bottom: "0%",
               containLabel: true,
             },
-            xAxis: [
-              {
-                type: "category",
-                boundaryGap: false,
-                data: "@range(1,32)",
-                axisTick: {
-                  alignWithLabel: true,
-                },
-              },
-            ],
-            yAxis: [
-              {
-                type: "value",
-              },
-            ],
+            xAxis: {
+              type: "category",
+              data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            },
+            yAxis: {
+              type: "value",
+            },
             series: [
               {
-                name: "访问量",
-                type: "line",
-                "data|1-31": ["@integer(10, 32)"],
-                smooth: true,
-                areaStyle: {},
+                data: [120, 200, 150, 80, 70, 110, 130],
+                type: "bar",
+                showBackground: true,
+                backgroundStyle: {
+                  color: "rgba(220, 220, 220, 0.8)",
+                },
               },
             ],
           },
@@ -73,7 +66,7 @@ export default [
                 height: "100%",
                 textStyle: {
                   normal: {
-                    color() {
+                    color: () => {
                       const arr = [
                         "#1890FF",
                         "#36CBCB",
