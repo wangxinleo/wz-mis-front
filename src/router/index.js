@@ -63,7 +63,7 @@ export const asyncRoutes = [
     name: "MIS",
     meta: {
       title: "MIS相关",
-      icon: "user-edit",
+      icon: "charging-station",
       permissions: ["admin"],
     },
     children: [
@@ -84,7 +84,7 @@ export const asyncRoutes = [
         name: "MISedits",
         meta: {
           title: "信息录入",
-          icon: "book-reader",
+          icon: "edit",
           permissions: ["admin"],
         },
         children: [

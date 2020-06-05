@@ -2,15 +2,15 @@
   <div class="index-container">
     <el-row :gutter="15">
       <!-- 介绍条 -->
-      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+      <!-- <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
         <el-alert title="欢迎来到MIS辅助管理系统" :closable="false"> </el-alert>
         <br />
-      </el-col>
+      </el-col> -->
       <!-- 流程统计 -->
-      <el-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
-        <el-card shadow="never" class="card">
+      <el-col :xs="24" :sm="24" :md="12" :lg="6" :xl="6">
+        <el-card shadow="never">
           <div slot="header">
-            <span>MIS流程统计</span>
+            <span>在线量</span>
           </div>
           <byui-chart
             :autoresize="true"
@@ -19,45 +19,103 @@
           />
           <div class="bottom">
             <span
+              >日均在线量:
+
+              <byui-count
+                :start-val="MIStaskCount.startVal"
+                :end-val="MIStaskCount.endVal"
+                :duration="MIStaskCount.duration"
+                :separator="MIStaskCount.separator"
+                :prefix="MIStaskCount.prefix"
+                :suffix="MIStaskCount.suffix"
+                :decimals="MIStaskCount.decimals"
+              />
+            </span>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="24" :md="12" :lg="6" :xl="6">
+        <el-card shadow="never">
+          <div slot="header">
+            <span>MIS月度任务分布</span>
+          </div>
+          <byui-chart
+            :autoresize="true"
+            theme="byui-echarts-theme"
+            :options="MISprocessCount"
+          />
+          <div class="bottom">
+            <span
               >月均任务量:
 
               <byui-count
-                :start-val="config1.startVal"
-                :end-val="config1.endVal"
-                :duration="config1.duration"
-                :separator="config1.separator"
-                :prefix="config1.prefix"
-                :suffix="config1.suffix"
-                :decimals="config1.decimals"
+                :start-val="MIStaskCount.startVal"
+                :end-val="MIStaskCount.endVal"
+                :duration="MIStaskCount.duration"
+                :separator="MIStaskCount.separator"
+                :prefix="MIStaskCount.prefix"
+                :suffix="MIStaskCount.suffix"
+                :decimals="MIStaskCount.decimals"
               />
             </span>
           </div>
         </el-card>
       </el-col>
       <!-- 热点流程 -->
-      <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-        <el-card shadow="never" class="card">
+      <el-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12">
+        <el-card shadow="never">
           <div slot="header">
-            <span>热点流程</span>
+            <span>热点流程->Top20</span>
           </div>
           <byui-chart
             :autoresize="true"
             theme="byui-echarts-theme"
-            :options="cy"
+            :options="hotProcess"
             @click="handleClick"
           />
           <div class="bottom">
             <span
               >近期归档量:<byui-count
-                :start-val="config3.startVal"
-                :end-val="config3.endVal"
-                :duration="config3.duration"
-                :separator="config3.separator"
-                :prefix="config3.prefix"
-                :suffix="config3.suffix"
-                :decimals="config3.decimals"
+                :start-val="processCount.startVal"
+                :end-val="processCount.endVal"
+                :duration="processCount.duration"
+                :separator="processCount.separator"
+                :prefix="processCount.prefix"
+                :suffix="processCount.suffix"
+                :decimals="processCount.decimals"
             /></span>
           </div>
+        </el-card>
+      </el-col>
+      <!-- 11 -->
+      <el-col :xs="24" :sm="24" :md="24" :lg="16" :xl="16">
+        <el-card class="card" shadow="never">
+          <div slot="header">
+            <span>系统归档量</span>
+          </div>
+          <byui-chart
+            :autoresize="true"
+            theme="byui-echarts-theme"
+            :options="ProcessNumByYY"
+          />
+        </el-card>
+      </el-col>
+      <!-- OA开发日志 -->
+      <el-col :xs="24" :sm="24" :md="24" :lg="8" :xl="8">
+        <el-card class="card" shadow="never">
+          <div slot="header">
+            <span>OA开发日志</span>
+          </div>
+          <el-timeline :reverse="reverse">
+            <el-timeline-item
+              v-for="(activity, index) in activities"
+              :key="index"
+              :timestamp="activity.timestamp"
+              :color="activity.color"
+            >
+              {{ activity.content }}
+            </el-timeline-item>
+          </el-timeline>
         </el-card>
       </el-col>
       <!-- app按钮 -->
@@ -80,24 +138,6 @@
           </el-card>
         </app-link>
       </el-col>
-      <!-- 更新日志 -->
-      <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-        <el-card class="card" shadow="never">
-          <div slot="header">
-            <span>更新日志</span>
-          </div>
-          <el-timeline :reverse="reverse">
-            <el-timeline-item
-              v-for="(activity, index) in activities"
-              :key="index"
-              :timestamp="activity.timestamp"
-              :color="activity.color"
-            >
-              {{ activity.content }}
-            </el-timeline-item>
-          </el-timeline>
-        </el-card>
-      </el-col>
     </el-row>
   </div>
 </template>
@@ -107,7 +147,11 @@ import ByuiChart from "@/plugins/echarts";
 import ByuiCount from "@/plugins/byuiCount";
 import AppLink from "@/layouts/components/Link";
 import { dependencies, devDependencies } from "../../../package.json";
-import { getGZLList, getCY } from "@/api/Rwl.js";
+import {
+  getMISProcessList,
+  getHotProcess,
+  getProcessNumByYY,
+} from "@/api/processEcharts.js";
 import { getFetchData } from "@/api/changeLog.js";
 export default {
   name: "Index",
@@ -119,7 +163,7 @@ export default {
   data() {
     return {
       nodeEnv: process.env.NODE_ENV,
-      config1: {
+      MIStaskCount: {
         startVal: 0,
         endVal: 0,
         decimals: 0,
@@ -128,7 +172,7 @@ export default {
         separator: ",",
         duration: 8000,
       },
-      config3: {
+      processCount: {
         startVal: 0,
         endVal: 0,
         decimals: 0,
@@ -138,96 +182,184 @@ export default {
         duration: 8000,
       },
       //访问量
-      fwl: {},
-      // 词云
-      cy: {},
+      fwl: {
+        grid: {
+          top: "4%",
+          left: "2%",
+          right: "4%",
+          bottom: "0%",
+          containLabel: true,
+        },
+        xAxis: [
+          {
+            type: "category",
+            boundaryGap: false,
+            data: ["0时", "4时", "8时", "12时", "16时", "20时", "24时"],
+            axisTick: {
+              alignWithLabel: true,
+            },
+          },
+        ],
+        yAxis: [
+          {
+            type: "value",
+          },
+        ],
+        series: [
+          {
+            name: "访问量",
+            type: "line",
+            data: [10, 52, 20, 33, 39, 33, 22],
+            smooth: true,
+            areaStyle: {},
+          },
+        ],
+      },
+      // MIS月度任务分布
+      MISprocessCount: {},
+      // 热门流程
+      hotProcess: {},
+      //年流程量
+      ProcessNumByYY: {},
       //卡片图标
       iconList: [
         {
-          icon: "video",
-          title: "视频播放器",
-          link: "/byui/player",
+          icon: "book-reader",
+          title: "权限查询",
+          link: "/MIS/MISreads",
           color: "#ffc069",
         },
         {
-          icon: "table",
-          title: "表格",
-          link: "/byui/table/comprehensiveTable",
+          icon: "file-upload",
+          title: "档案上传",
+          link: "/MIS/MISedits/MISFile",
           color: "#5cdbd3",
         },
         {
-          icon: "laptop-code",
-          title: "源码",
-          link: "https://github.com/chuzhixin/vue-admin-beautiful",
+          icon: "mobile-alt",
+          title: "申请功能机",
+          link: "/MIS/MISedits/MISmobile",
           color: "#b37feb",
         },
         {
-          icon: "book",
-          title: "XXX",
-          link: "",
+          icon: "desktop",
+          title: "OA首页",
+          link: "http://172.18.8.20",
           color: "#69c0ff",
         },
         {
           icon: "bullhorn",
-          title: "XXX",
+          title: "敬请期待",
           link: "",
           color: "#ff85c0",
         },
         {
           icon: "gift",
-          title: "XXX",
+          title: "敬请期待",
           link: "",
           color: "#ffd666",
         },
 
         {
           icon: "balance-scale-left",
-          title: "公平的世界",
+          title: "敬请期待",
           link: "",
           color: "#ff9c6e",
         },
         {
           icon: "coffee",
-          title: "休息一下",
+          title: "敬请期待",
           link: "",
           color: "#95de64",
         },
       ],
-      //更新日志
+      //OA开发日志
       reverse: true,
       activities: [],
     };
   },
   created() {
-    this.getGZLList();
-    this.getCY();
-    this.getFetchData();
+    this.loadLocalStorage();
   },
   mounted() {},
   methods: {
+    // 加载缓存数据
+    loadLocalStorage() {
+      if (
+        !localStorage.getItem("loadTime") ||
+        localStorage.getItem("loadTime") < Date.now()
+      ) {
+        // 加载图表
+        async () => {
+          this.getMISProcessList();
+          this.getHotProcess();
+          this.getProcessNumByYY();
+          await localStorage.setItem("loadTime", Date.now() + 60 * 60 * 1000);
+        };
+      } else {
+        // 加载缓存的数据
+        this.MISprocessCount = JSON.parse(
+          localStorage.getItem("MISprocessCount")
+        ).data;
+        this.hotProcess = JSON.parse(localStorage.getItem("hotProcess")).data;
+        // this.FetchData = JSON.parse(localStorage.getItem("")).data;
+        this.ProcessNumByYY = JSON.parse(
+          localStorage.getItem("ProcessNumByYY")
+        ).data;
+
+        this.MIStaskCount.endVal = JSON.parse(
+          localStorage.getItem("MISprocessCount")
+        ).totalCount;
+        this.processCount.endVal = JSON.parse(
+          localStorage.getItem("hotProcess")
+        ).totalCount;
+      }
+    },
+    // 缓存到本地
+    setlocalData(value, res) {
+      const obj = {
+        totalCount: res.totalCount,
+        // date: Date.now() + 60 * 60 * 1000,
+        data: res.data,
+      };
+      const temp = JSON.stringify(obj);
+      localStorage.setItem(value, temp);
+    },
     handleClick(e) {
       this.$baseMessage(`点击了${e.name},这里可以写跳转`);
     },
-    // MIS流程统计
-    getGZLList() {
-      getGZLList().then((res) => {
-        console.log(res);
-        this.fwl = res.data;
-        this.config1.endVal = res.totalCount;
+    // MIS月度任务分布
+    getMISProcessList() {
+      getMISProcessList().then((res) => {
+        // 呈现数据
+        this.MISprocessCount = res.data;
+        //缓存到本地
+        this.setlocalData("MISprocessCount", res);
+        // 获取总数
+        this.MIStaskCount.endVal = res.totalCount;
       });
     },
-    // 词云
-    getCY() {
-      getCY().then((res) => {
-        console.log(res);
-        this.cy = res.data;
-        this.config3.endVal = res.totalCount;
+    // 热门流程
+    getHotProcess() {
+      getHotProcess().then((res) => {
+        this.hotProcess = res.data;
+        // 缓存到本地
+        this.setlocalData("hotProcess", res);
+        // 计算总数
+        this.processCount.endVal = res.totalCount;
       });
     },
-    // 更新日志
+    // 近两年流程归档量对比
+    getProcessNumByYY() {
+      getProcessNumByYY().then((res) => {
+        this.ProcessNumByYY = res.data;
+        // 缓存到本地
+        this.setlocalData("ProcessNumByYY", res);
+      });
+    },
+    // OA开发日志
     getFetchData() {
       getFetchData().then((res) => {
-        console.log(res);
         res.data.map((item, index) => {
           if (index === res.data.length - 1) {
             item.color = "#0bbd87";
@@ -246,7 +378,7 @@ export default {
     .el-card__body {
       .echarts {
         width: 100%;
-        height: 200px;
+        height: 140px;
       }
     }
   }

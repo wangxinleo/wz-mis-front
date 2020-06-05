@@ -10,7 +10,7 @@ export default [
         msg: "success",
         totalCount: 999,
         data: mock({
-          "data|10-31": [
+          "data|5": [
             {
               content: "@character",
               timestamp: "@time",

@@ -1,23 +1,23 @@
 import request from "@/utils/request";
 
-export function getGZLList(data) {
+export function getMISProcessList(data) {
   return request({
-    url: "/Rwl/getGZLList",
+    url: "/processEcharts/getMISProcessList",
     method: "post",
     data,
   });
 }
-export function getCY(data) {
+export function getHotProcess(data) {
   return request({
-    url: "/Rwl/getCY",
+    url: "/processEcharts/getHotProcess",
     method: "post",
     data,
   });
 }
 
-export function doEdit(data) {
+export function getProcessNumByYY(data) {
   return request({
-    url: "/Rwl/doEdit",
+    url: "/processEcharts/getProcessNumByYY",
     method: "post",
     data,
   });
@@ -25,7 +25,7 @@ export function doEdit(data) {
 
 export function doDelete(data) {
   return request({
-    url: "/Rwl/doDelete",
+    url: "/processEcharts/doDelete",
     method: "post",
     data,
   });
