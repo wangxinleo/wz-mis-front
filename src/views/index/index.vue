@@ -290,6 +290,7 @@ export default {
         localStorage.getItem("loadTime") < Date.now()
       ) {
         // 加载图表
+        // 有了一个新的idea
         async () => {
           this.getMISProcessList();
           this.getHotProcess();
