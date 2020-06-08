@@ -7,19 +7,3 @@ export function getFetchData(data) {
     data,
   });
 }
-
-export function doEdit(data) {
-  return request({
-    url: "/changeLog/doEdit",
-    method: "post",
-    data,
-  });
-}
-
-export function doDelete(data) {
-  return request({
-    url: "/changeLog/doDelete",
-    method: "post",
-    data,
-  });
-}

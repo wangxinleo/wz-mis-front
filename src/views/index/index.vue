@@ -287,30 +287,42 @@ export default {
     loadLocalStorage() {
       if (
         !localStorage.getItem("loadTime") ||
+        // 时间过期触发
         localStorage.getItem("loadTime") < Date.now()
       ) {
         // 加载图表
-        // 有了一个新的idea
-        async () => {
-          this.getMISProcessList();
-          this.getHotProcess();
-          this.getProcessNumByYY();
-          await localStorage.setItem("loadTime", Date.now() + 60 * 60 * 1000);
-        };
+        // MIS月度任务分布
+        const p1 = this.getMISProcessList();
+        // 热门流程
+        const p2 = this.getHotProcess();
+        // 年流程量
+        const p3 = this.getProcessNumByYY();
+        // OA开发日志
+        const p4 = this.getFetchData();
+        Promise.all([p1, p2, p3, p4]).then((res) => {
+          // 等待异步完成触发
+          localStorage.setItem("loadTime", Date.now() + 60 * 60 * 1000);
+        });
       } else {
         // 加载缓存的数据
+        // MIS月度任务分布
         this.MISprocessCount = JSON.parse(
           localStorage.getItem("MISprocessCount")
         ).data;
+        // 热门流程
         this.hotProcess = JSON.parse(localStorage.getItem("hotProcess")).data;
-        // this.FetchData = JSON.parse(localStorage.getItem("")).data;
+        // OA开发日志
+        this.activities = JSON.parse(localStorage.getItem("activities")).data;
+        // 年流程量
         this.ProcessNumByYY = JSON.parse(
           localStorage.getItem("ProcessNumByYY")
         ).data;
 
+        // MIS月度任务分布总量
         this.MIStaskCount.endVal = JSON.parse(
           localStorage.getItem("MISprocessCount")
         ).totalCount;
+        // 热门流程总量
         this.processCount.endVal = JSON.parse(
           localStorage.getItem("hotProcess")
         ).totalCount;
@@ -326,6 +338,7 @@ export default {
       const temp = JSON.stringify(obj);
       localStorage.setItem(value, temp);
     },
+    // 点击热门流程
     handleClick(e) {
       this.$baseMessage(`点击了${e.name},这里可以写跳转`);
     },
@@ -367,6 +380,8 @@ export default {
           }
         });
         this.activities = res.data;
+        // 缓存到本地
+        this.setlocalData("activities", res);
       });
     },
   },

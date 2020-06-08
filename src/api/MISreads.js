@@ -2,7 +2,7 @@ import request from "@/utils/request";
 
 export function getEmpData(data) {
   return request({
-    url: "/MISreads/getEmpData",
+    url: "/MIS/getEmpData",
     method: "post",
     data,
   });
