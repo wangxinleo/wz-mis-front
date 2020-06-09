@@ -45,11 +45,12 @@
           <el-tabs type="border-card">
             <el-tab-pane label="OA权限申请记录">
               <el-table
-                :data="OAMISData"
+                v-loading="loading"
+                :data="OAMISData.data"
                 style="width: 100%;"
                 border
                 stripe
-                height="600"
+                height="560"
               >
                 <el-table-column type="expand">
                   <template slot-scope="scope">
@@ -59,53 +60,108 @@
                       label-width="150px"
                     >
                       <el-form-item label="所任职务">
-                        <span>{{ scope.row.empPosition }}</span>
+                        <span>{{ scope.row.XmlData.text_zw }}</span>
                       </el-form-item>
                       <el-form-item label="联系电话">
-                        <span>{{ scope.row.tel }}</span>
+                        <span>{{ scope.row.XmlData.text_lxdh }}</span>
                       </el-form-item>
-                      <el-form-item label="邮箱地址">
-                        <span>{{ scope.row.mail }}</span>
+                      <el-form-item label="姓名全拼">
+                        <span>{{ scope.row.XmlData.text_xmqp }}</span>
                       </el-form-item>
                       <el-form-item label="登记的邮箱密码">
-                        <span>{{ scope.row.mailPass }}</span>
+                        <span>{{ scope.row.XmlData.text_mm }}</span>
+                      </el-form-item>
+                      <el-form-item label="OA单号">
+                        <span
+                          ><a @click="dumpOAdoc(scope.row)">{{
+                            scope.row.WF_DocNumber
+                          }}</a></span
+                        >
                       </el-form-item>
                     </el-form>
                   </template>
                 </el-table-column>
-                <el-table-column type="index" label="#"></el-table-column>
-                <el-table-column prop="empNum" label="工号" width="100">
-                </el-table-column>
-                <el-table-column prop="empName" label="姓名" width="100">
-                </el-table-column>
-                <el-table-column prop="empDep" label="部门" width="150">
-                </el-table-column>
-                <el-table-column prop="comCode" label="电脑编号" width="150">
-                </el-table-column>
-                <el-table-column prop="powers" label="权限" width="200">
+                <el-table-column type="index" label="#">
                   <template slot-scope="scope">
-                    <el-tag v-if="scope.row.powers.inMail === true"
+                    {{
+                      (OAMISData.page - 1) * OAMISData.pageSize +
+                      scope.$index +
+                      1
+                    }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="XmlData.text_gh"
+                  label="工号"
+                  width="100"
+                >
+                </el-table-column>
+                <el-table-column
+                  prop="XmlData.text_xm"
+                  label="姓名"
+                  width="100"
+                >
+                </el-table-column>
+                <el-table-column
+                  prop="XmlData.text_bm"
+                  label="部门"
+                  width="150"
+                >
+                </el-table-column>
+                <el-table-column
+                  prop="XmlData.text_jsjmc"
+                  label="电脑编号"
+                  width="150"
+                >
+                </el-table-column>
+                <el-table-column prop="powers" label="权限" width="250">
+                  <template slot-scope="scope">
+                    <el-tag v-if="scope.row.XmlData.sqlb_nb === '内邮Mail权限'"
                       >内邮</el-tag
                     >
                     <el-tag
-                      v-if="scope.row.powers.internet === true"
+                      v-if="scope.row.XmlData.sqlb_i === 'Internet权限'"
                       type="danger"
                       >外网</el-tag
                     >
                     <el-tag
-                      v-if="scope.row.powers.outMail === true"
-                      type="success"
+                      v-if="scope.row.XmlData.sqlb_wb === '外部Mail权限'"
+                      type="info"
                       >外邮</el-tag
+                    >
+                    <el-tag
+                      v-if="
+                        scope.row.XmlData.sqlb_wx === true ||
+                        String(scope.row.XmlData.text_qt).indexOf('微信') !== -1
+                      "
+                      type="success"
+                      >微信</el-tag
                     >
                   </template>
                 </el-table-column>
                 <el-table-column
                   show-overflow-tooltip
-                  prop="ill"
-                  label="	其他说明"
+                  prop="XmlData.text_qt"
+                  label="其他说明"
+                >
+                </el-table-column>
+                <el-table-column
+                  prop="WF_DocCreated"
+                  label="申请时间"
+                  width="150"
                 >
                 </el-table-column>
               </el-table>
+              <el-pagination
+                :current-page="OAMISData.page"
+                :page-sizes="[10, 20, 50, 100]"
+                :page-size="OAMISData.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total.OAMISData"
+                @size-change="OAMISDataSizeChange"
+                @current-change="OAMISDataCurrentChange"
+              >
+              </el-pagination>
             </el-tab-pane>
             <el-tab-pane label="纸质档案记录">
               <el-table
@@ -188,6 +244,7 @@
 
 <script>
 import { getEmpData, getFilesData, getPhonesData } from "@/api/MISreads";
+import _ from "lodash";
 export default {
   name: "Misreads",
   components: {},
@@ -195,20 +252,60 @@ export default {
     return {
       MISReadsForm: {
         empText: "",
+        page: 1,
+        pageSize: 100,
       },
       MISReadsFormRules: {
         empText: [
           { required: true, message: "请输入员工信息", trigger: "blur" },
         ],
       },
+      // OA权限申请记录
       OAMISData: [],
+      // 纸质档案记录
       filesData: [],
+      // 功能机领取记录
       phonesData: [],
+      // 分页总量
+      total: {
+        OAMISData: 0,
+        filesData: 0,
+        phonesData: 0,
+      },
+      // 加载动画
+      loading: false,
     };
   },
   created() {},
   mounted() {},
   methods: {
+    // OA权限申请记录 分页数量
+    OAMISDataSizeChange(val) {
+      this.getEmpData({
+        empText: this.OAMISData.searchHistroy,
+        page: this.OAMISData.page,
+        pageSize: val,
+      });
+    },
+    // OA权限申请记录 当前页
+    OAMISDataCurrentChange(val) {
+      this.getEmpData({
+        empText: this.OAMISData.searchHistroy,
+        page: val,
+        pageSize: this.OAMISData.pageSize,
+      });
+    },
+    // 打开OA表单
+    dumpOAdoc(row) {
+      const href =
+        "http://172.18.8.20/bpm/linkey_workflow_engine.nsf/workflow_doc?readform&WF_ProcessUNID=" +
+        row.WF_ProcessUNID +
+        "&WF_DocUNID=" +
+        row.WF_DocUNID +
+        "&WF_DocAction=read";
+      // 新标签页打开
+      window.open(href);
+    },
     // 清空输入框
     clearEmpText() {
       this.$refs.MISReadsForm.resetFields();
@@ -216,14 +313,19 @@ export default {
     // 提交查询
     submitEmpText() {
       this.$refs.MISReadsForm.validate((validate) => {
+        // 空input return
         if (!validate) return false;
-        const empData = this.MISReadsForm.empText.split("\n");
-        this.getEmpData(empData);
-        this.getFilesData(empData);
-        this.getPhonesData(empData);
+        // 加载动画
+        this.loading = true;
+        // 深拷贝数据
+        const searchData = _.cloneDeep(this.MISReadsForm);
+        searchData.empText = searchData.empText.split("\n");
+        this.getEmpData(searchData);
+        // this.getFilesData(empData);
+        // this.getPhonesData(empData);
       });
     },
-    // 查询结果提示
+    // tag标签页旁边的新数据小星星
     newTips(element, status = "") {
       if (status === "delete") {
         $("#" + element + ' [class="newTip"]').remove();
@@ -241,47 +343,50 @@ export default {
 
     // 查询权限信息
     getEmpData(data) {
-      getEmpData(data).then((res) => {
-        console.log(res);
-        if (res.code !== 200) {
-          return Vue.prototype.$baseMessage(res.msg, "error");
-        }
-        if (res.data.length === 0) {
-          this.newTips("tab-0", "delete");
-        }
-        // 新查询结果提示
-        this.newTips("tab-0");
-        this.OAMISData = res.data;
-      });
+      getEmpData(data)
+        .then((res) => {
+          // 记录总行数，不然大于1页时无法返回正确的总数
+          if (res.page == 1) {
+            this.total.OAMISData = res.totalCount;
+          }
+          if (res.data.length === 0) {
+            this.newTips("tab-0", "delete");
+          }
+          // 新查询结果提示
+          this.newTips("tab-0");
+          // 呈现数据
+          this.OAMISData = res;
+          // 关闭加载动画
+          this.loading = false;
+        })
+        .catch((err) => {
+          this.loading = false;
+        });
     },
     // 查询纸质档案
     getFilesData(data) {
       getFilesData(data).then((res) => {
-        console.log(res);
-        if (res.code !== 200) {
-          return Vue.prototype.$baseMessage(res.msg, "error");
-        }
         if (res.data.length === 0) {
           this.newTips("tab-1", "delete");
         }
         // 新查询结果提示
         this.newTips("tab-1");
         this.filesData = res.data;
+        // 关闭loading
+        this.loading = false;
       });
     },
     // 查询功能机发放记录
     getPhonesData(data) {
       getPhonesData(data).then((res) => {
-        console.log(res);
-        if (res.code !== 200) {
-          return Vue.prototype.$baseMessage(res.msg, "error");
-        }
         if (res.data.length === 0) {
           this.newTips("tab-2", "delete");
         }
         // 新查询结果提示
         this.newTips("tab-2");
         this.phonesData = res.data;
+        // 关闭loading
+        this.loading = false;
       });
     },
   },
@@ -293,7 +398,7 @@ export default {
   ::v-deep {
     .el-card__body {
       width: 100%;
-      height: 700px;
+      height: 710px;
     }
 
     .el-textarea__inner {

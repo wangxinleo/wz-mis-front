@@ -44,7 +44,7 @@ module.exports = {
   //消息框消失时间
   messageDuration: 3000,
   //最长请求时间
-  requestTimeout: 5000,
+  requestTimeout: 10000,
   //操作正常code
   successCode: 200,
   //登录失效code
