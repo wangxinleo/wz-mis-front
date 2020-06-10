@@ -45,7 +45,7 @@
           <el-tabs type="border-card">
             <el-tab-pane label="OA权限申请记录">
               <el-table
-                v-loading="loading"
+                v-loading="loading.OAMISData"
                 :data="OAMISData.data"
                 style="width: 100%;"
                 border
@@ -181,40 +181,50 @@
             </el-tab-pane>
             <el-tab-pane label="功能机领取记录">
               <el-table
-                :data="phonesData"
+                :data="phonesData.data"
                 style="width: 100%;"
                 border
                 stripe
-                height="600"
+                height="560"
               >
                 <el-table-column type="index" label="#"></el-table-column>
-                <el-table-column prop="empNum" label="工号" width="100">
+                <el-table-column prop="employeeCode" label="工号" width="100">
                 </el-table-column>
-                <el-table-column prop="empName" label="姓名" width="100">
+                <el-table-column prop="employeeName" label="姓名" width="100">
                 </el-table-column>
                 <el-table-column prop="area" label="所属厂" width="100">
                 </el-table-column>
-                <el-table-column prop="empDep" label="部门" width="150">
+                <el-table-column prop="Department" label="部门" width="150">
                 </el-table-column>
-                <el-table-column prop="longTel" label="长号" width="150">
+                <el-table-column prop="issuePhoneNum" label="长号" width="150">
                 </el-table-column>
-                <el-table-column prop="shortTel" label="短号" width="100">
+                <el-table-column prop="issuePhoneSort" label="短号" width="100">
                 </el-table-column>
-                <el-table-column prop="status" label="状态" width="100">
+                <el-table-column prop="isReturn" label="状态" width="100">
                   <template slot-scope="scope">
-                    <el-tag v-if="scope.row.status === 0" type="danger"
-                      >已发出</el-tag
+                    <el-tag
+                      v-if="scope.row.isReturn === '已发出'"
+                      type="danger"
+                      >{{ scope.row.isReturn }}</el-tag
                     >
-                    <el-tag v-if="scope.row.status === 1" type="success"
-                      >已退回</el-tag
+                    <el-tag
+                      v-if="scope.row.isReturn === '已退回'"
+                      type="success"
+                      >{{ scope.row.isReturn }}</el-tag
                     >
 
-                    <el-tag v-if="scope.row.status === 2" type="warning"
-                      >其他</el-tag
+                    <el-tag
+                      v-if="scope.row.isReturn === '其他'"
+                      type="warning"
+                      >{{ scope.row.isReturn }}</el-tag
                     >
                   </template>
                 </el-table-column>
-                <el-table-column show-overflow-tooltip prop="ill" label="备注">
+                <el-table-column
+                  show-overflow-tooltip
+                  prop="remark"
+                  label="备注"
+                >
                 </el-table-column>
                 <el-table-column label="操作" width="150">
                   <template slot-scope="scope">
@@ -231,6 +241,16 @@
                   </template>
                 </el-table-column>
               </el-table>
+              <el-pagination
+                :current-page="phonesData.page"
+                :page-sizes="[10, 20, 50, 100]"
+                :page-size="phonesData.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total.phonesData"
+                @size-change="phonesDataSizeChange"
+                @current-change="phonesDataCurrentChange"
+              >
+              </el-pagination>
             </el-tab-pane>
             <el-tab-pane disabled label="电脑档案记录"
               >电脑档案记录</el-tab-pane
@@ -289,7 +309,11 @@ export default {
         phonesData: 0,
       },
       // 加载动画
-      loading: false,
+      loading: {
+        OAMISData: false,
+        filesData: false,
+        phonesData: false,
+      },
       // 图片弹出框
       fileVisible: false,
       fileUrl: "",
@@ -298,6 +322,22 @@ export default {
   created() {},
   mounted() {},
   methods: {
+    // OA权限申请记录 分页数量
+    phonesDataSizeChange(val) {
+      this.getPhonesData({
+        empText: this.phonesData.searchHistroy,
+        page: this.phonesData.page,
+        pageSize: val,
+      });
+    },
+    // OA权限申请记录 当前页
+    phonesDataCurrentChange(val) {
+      this.getPhonesData({
+        empText: this.phonesData.searchHistroy,
+        page: val,
+        pageSize: this.phonesData.pageSize,
+      });
+    },
     // OA权限申请记录 分页数量
     OAMISDataSizeChange(val) {
       this.getEmpData({
@@ -345,14 +385,17 @@ export default {
       this.$refs.MISReadsForm.validate((validate) => {
         // 空input return
         if (!validate) return false;
-        // 加载动画
-        this.loading = true;
         // 深拷贝数据
         const searchData = _.cloneDeep(this.MISReadsForm);
         searchData.empText = searchData.empText.split("\n");
+        // 加载动画
+        this.loading.OAMISData = true;
+        this.loading.filesData = true;
+        this.loading.phonesData = true;
+        // 执行查询
         this.getEmpData(searchData);
         this.getFilesData(searchData);
-        // this.getPhonesData(empData);
+        this.getPhonesData(searchData);
       });
     },
     // tag标签页旁边的新数据小星星
@@ -379,52 +422,56 @@ export default {
           if (res.page == 1) {
             this.total.OAMISData = res.totalCount;
           }
-          if (res.data.length === 0) {
-            this.newTips("tab-0", "delete");
-          }
           // 新查询结果提示
           this.newTips("tab-0");
           // 呈现数据
           this.OAMISData = res;
           // 关闭加载动画
-          this.loading = false;
+          this.loading.OAMISData = false;
         })
         .catch((err) => {
-          this.loading = false;
+          this.newTips("tab-0", "delete");
+          this.loading.OAMISData = false;
+          this.OAMISData = "";
         });
     },
     // 查询纸质档案记录
     getFilesData(data) {
-      getFilesData(data).then((res) => {
-        if (res.data.length === 0) {
+      getFilesData(data)
+        .then((res) => {
+          // 新查询结果提示
+          this.newTips("tab-1");
+          this.filesData = res;
+        })
+        .catch((err) => {
           this.newTips("tab-1", "delete");
-        }
-        // 新查询结果提示
-        this.newTips("tab-1");
-        this.filesData = res;
-        // 关闭loading
-        this.loading = false;
-      });
+          this.loading.filesData = false;
+          this.filesData = "";
+        });
     },
     // 打开纸质档案图片
     openFilesUrl(data) {
       openFilesUrl(data).then((res) => {
-        console.log(res);
         this.fileUrl = res.data;
       });
     },
     // 查询功能机发放记录
     getPhonesData(data) {
-      getPhonesData(data).then((res) => {
-        if (res.data.length === 0) {
+      getPhonesData(data)
+        .then((res) => {
+          // 记录总行数，不然大于1页时无法返回正确的总数
+          if (res.page == 1) {
+            this.total.phonesData = res.totalCount;
+          }
+          // 新查询结果提示
+          this.newTips("tab-2");
+          this.phonesData = res;
+        })
+        .catch((err) => {
           this.newTips("tab-2", "delete");
-        }
-        // 新查询结果提示
-        this.newTips("tab-2");
-        this.phonesData = res.data;
-        // 关闭loading
-        this.loading = false;
-      });
+          this.loading.phonesData = false;
+          this.phonesData = "";
+        });
     },
   },
 };
@@ -435,7 +482,7 @@ export default {
   ::v-deep {
     .el-card__body {
       width: 100%;
-      height: 710px;
+      height: 708px;
     }
 
     .el-textarea__inner {

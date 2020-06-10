@@ -25,23 +25,21 @@ export function openFilesUrl(data) {
 
 export function getPhonesData(data) {
   return request({
-    url: "/MISreads/getPhonesData",
+    url: "/MIS/getPhonesData",
     method: "post",
     data,
   });
 }
-
-export function doEdit(data) {
+export function getAreaOption(data) {
   return request({
-    url: "/MISreads/doEdit",
+    url: "/MIS/getAreaOption",
     method: "post",
     data,
   });
 }
-
-export function doDelete(data) {
+export function getDeptOption(data) {
   return request({
-    url: "/MISreads/doDelete",
+    url: "/MIS/getDeptOption",
     method: "post",
     data,
   });

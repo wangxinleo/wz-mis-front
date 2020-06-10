@@ -10,32 +10,35 @@
             label-width="100px"
             class="demo-ruleForm"
           >
-            <el-form-item label="工号" prop="empNum">
-              <el-input v-model="MISmobileForm.empNum"></el-input>
+            <el-form-item label="工号" prop="employeeCode">
+              <el-input v-model="MISmobileForm.employeeCode"></el-input>
             </el-form-item>
-            <el-form-item label="姓名" prop="empName">
-              <el-input v-model="MISmobileForm.empName"></el-input>
+            <el-form-item label="姓名" prop="employeeName">
+              <el-input v-model="MISmobileForm.employeeName"></el-input>
             </el-form-item>
             <el-form-item label="所属厂" prop="area">
-              <el-input v-model="MISmobileForm.area"></el-input>
+              <el-input v-model="MISmobileForm.area" list="area"></el-input>
+              <datalist id="area">
+                <option>男11</option>
+              </datalist>
             </el-form-item>
-            <el-form-item label="部门" prop="empDep">
-              <el-input v-model="MISmobileForm.empDep"></el-input>
+            <el-form-item label="部门" prop="Department">
+              <el-input v-model="MISmobileForm.Department"></el-input>
             </el-form-item>
-            <el-form-item label="长号" prop="longTel">
-              <el-input v-model="MISmobileForm.longTel"></el-input>
+            <el-form-item label="长号" prop="issuePhoneNum">
+              <el-input v-model="MISmobileForm.issuePhoneNum"></el-input>
             </el-form-item>
-            <el-form-item label="短号" prop="shortTel">
-              <el-input v-model="MISmobileForm.shortTel"></el-input>
+            <el-form-item label="短号" prop="issuePhoneSort">
+              <el-input v-model="MISmobileForm.issuePhoneSort"></el-input>
             </el-form-item>
-            <el-form-item label="状态" prop="status">
+            <el-form-item label="状态" prop="isReturn">
               <el-select
-                v-model="MISmobileForm.status"
+                v-model="MISmobileForm.isReturn"
                 placeholder="请选择状态"
               >
-                <el-option label="已发出" value="0"></el-option>
-                <el-option label="已退回" value="1"></el-option>
-                <el-option label="其他" value="2"></el-option>
+                <el-option label="已发出" value="已发出"></el-option>
+                <el-option label="已退回" value="已退回"></el-option>
+                <el-option label="其他" value="其他"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
@@ -52,29 +55,44 @@
 </template>
 
 <script>
+import { getAreaOption, getDeptOption } from "@/api/MISreads";
 export default {
   name: "MiSmobile",
   components: {},
   data() {
     return {
       MISmobileForm: {
-        empNum: "",
-        empName: "",
+        employeeCode: "",
+        employeeName: "",
         area: "",
-        empDep: "",
-        longTel: "",
-        shortTel: "",
-        status: "",
+        Department: "",
+        issuePhoneNum: "",
+        issuePhoneSort: "",
+        isReturn: "",
       },
       MISmobileRules: {
-        empNum: [{ required: true, message: "请输入工号", trigger: "blur" }],
-        empName: [{ required: true, message: "请输入姓名", trigger: "blur" }],
+        employeeCode: [
+          { required: true, message: "请输入工号", trigger: "blur" },
+        ],
+        employeeName: [
+          { required: true, message: "请输入姓名", trigger: "blur" },
+        ],
         area: [{ required: true, message: "请输入所属厂", trigger: "blur" }],
-        empDep: [{ required: true, message: "请输入部门", trigger: "blur" }],
-        longTel: [{ required: true, message: "请输入长号", trigger: "blur" }],
-        shortTel: [{ required: true, message: "请输入短号", trigger: "blur" }],
-        status: [{ required: true, message: "请选择状态", trigger: "blur" }],
+        Department: [
+          { required: true, message: "请输入部门", trigger: "blur" },
+        ],
+        issuePhoneNum: [
+          { required: true, message: "请输入长号", trigger: "blur" },
+        ],
+        issuePhoneSort: [
+          { required: true, message: "请输入短号", trigger: "blur" },
+        ],
+        isReturn: [{ required: true, message: "请选择状态", trigger: "blur" }],
       },
+      // 所属厂提示信息
+      areaOption: [],
+      // 部门提示信息
+      deptOption: [],
     };
   },
   created() {},
@@ -89,6 +107,22 @@ export default {
     },
     resetForm(formName) {
       this.$refs.MISmobileForm.resetFields();
+    },
+    /**
+     * 网络方法
+     */
+
+    // 获取所属厂提示信息
+    getAreaOption(data) {
+      getAreaOption(data).then((res) => {
+        this.areaOption = res.data;
+      });
+    },
+    // 获取部门提示信息
+    getDeptOption(data) {
+      getDeptOption(data).then((res) => {
+        this.deptOption = res.data;
+      });
     },
   },
 };

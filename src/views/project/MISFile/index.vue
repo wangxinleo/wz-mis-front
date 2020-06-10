@@ -5,12 +5,12 @@
         <el-card>
           <el-upload
             ref="upload"
-            action="https://jsonplaceholder.typicode.com/posts/"
-            :on-preview="handlePreview"
-            :on-remove="handleRemove"
+            action="http://127.0.0.1:3000/api/private/v1/upload/MISFile"
+            :before-upload="beforeUpload"
             :file-list="fileList"
             list-type="picture"
             :auto-upload="false"
+            multiple
           >
             <el-button slot="trigger" size="small" type="primary"
               >选取文件</el-button
@@ -30,6 +30,13 @@
                 effect="dark"
               >
               </el-alert>
+              <el-alert
+                title="提示:"
+                type="info"
+                description="请按照 【李阳20200108（825322）.jpg】 名称格式上传文件"
+                show-icon
+                :closable="false"
+              ></el-alert>
             </div>
           </el-upload>
         </el-card>
@@ -39,36 +46,39 @@
 </template>
 
 <script>
+import { Message } from "element-ui";
 export default {
   name: "MisFile",
   components: {},
   data() {
     return {
-      fileList: [
-        {
-          name: "food.jpeg",
-          url:
-            "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
-        },
-        {
-          name: "food2.jpeg",
-          url:
-            "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
-        },
-      ],
+      fileList: [],
     };
   },
   created() {},
   mounted() {},
   methods: {
     submitUpload() {
+      console.log(123);
       this.$refs.upload.submit();
     },
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
-    },
-    handlePreview(file) {
+    beforeUpload(file) {
       console.log(file);
+      const filename = file.name;
+      console.log(filename);
+      if (
+        (filename.indexOf("(") !== -1 && filename.indexOf(")") !== -1) ||
+        (filename.indexOf("（") !== -1 && filename.indexOf("）") !== -1)
+      ) {
+        return true;
+      } else {
+        Message({
+          message: "请按照 【李阳20200108（825322）.jpg】 名称格式上传文件",
+          type: "error",
+          duration: 3000,
+        });
+        return false;
+      }
     },
   },
 };
