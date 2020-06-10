@@ -10,7 +10,14 @@ export function getEmpData(data) {
 
 export function getFilesData(data) {
   return request({
-    url: "/MISreads/getFilesData",
+    url: "/MIS/getFilesData",
+    method: "post",
+    data,
+  });
+}
+export function openFilesUrl(data) {
+  return request({
+    url: "/MIS/openFilesUrl",
     method: "post",
     data,
   });

@@ -165,16 +165,16 @@
             </el-tab-pane>
             <el-tab-pane label="纸质档案记录">
               <el-table
-                :data="filesData"
+                :data="filesData.data"
                 style="width: 100%;"
                 border
                 stripe
-                height="600"
+                height="560"
               >
                 <el-table-column type="index" label="#"></el-table-column>
                 <el-table-column prop="path" label="匹配记录">
                   <template slot-scope="scope">
-                    <a :href="scope.row.path">{{ scope.row.name }}</a>
+                    <a @click="dumpFile(scope.row)">{{ scope.row.name }}</a>
                   </template>
                 </el-table-column>
               </el-table>
@@ -239,11 +239,27 @@
         </el-card>
       </el-col>
     </el-row>
+    <!-- 图片弹出框 -->
+    <el-dialog
+      title="文件预览"
+      :visible.sync="fileVisible"
+      :before-close="fileClose"
+      width="80%"
+    >
+      <div>
+        <img :src="fileUrl" />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getEmpData, getFilesData, getPhonesData } from "@/api/MISreads";
+import {
+  getEmpData,
+  getFilesData,
+  getPhonesData,
+  openFilesUrl,
+} from "@/api/MISreads";
 import _ from "lodash";
 export default {
   name: "Misreads",
@@ -274,6 +290,9 @@ export default {
       },
       // 加载动画
       loading: false,
+      // 图片弹出框
+      fileVisible: false,
+      fileUrl: "",
     };
   },
   created() {},
@@ -306,6 +325,17 @@ export default {
       // 新标签页打开
       window.open(href);
     },
+    // 打开纸质档案图片
+    dumpFile(row) {
+      this.fileVisible = true;
+      console.log(row);
+      this.openFilesUrl(row);
+    },
+    // 关闭纸质档案
+    fileClose() {
+      this.fileVisible = false;
+      this.fileUrl = "";
+    },
     // 清空输入框
     clearEmpText() {
       this.$refs.MISReadsForm.resetFields();
@@ -321,7 +351,7 @@ export default {
         const searchData = _.cloneDeep(this.MISReadsForm);
         searchData.empText = searchData.empText.split("\n");
         this.getEmpData(searchData);
-        // this.getFilesData(empData);
+        this.getFilesData(searchData);
         // this.getPhonesData(empData);
       });
     },
@@ -341,7 +371,7 @@ export default {
      * 网络请求
      */
 
-    // 查询权限信息
+    // 查询OA权限申请记录
     getEmpData(data) {
       getEmpData(data)
         .then((res) => {
@@ -363,7 +393,7 @@ export default {
           this.loading = false;
         });
     },
-    // 查询纸质档案
+    // 查询纸质档案记录
     getFilesData(data) {
       getFilesData(data).then((res) => {
         if (res.data.length === 0) {
@@ -371,9 +401,16 @@ export default {
         }
         // 新查询结果提示
         this.newTips("tab-1");
-        this.filesData = res.data;
+        this.filesData = res;
         // 关闭loading
         this.loading = false;
+      });
+    },
+    // 打开纸质档案图片
+    openFilesUrl(data) {
+      openFilesUrl(data).then((res) => {
+        console.log(res);
+        this.fileUrl = res.data;
       });
     },
     // 查询功能机发放记录
