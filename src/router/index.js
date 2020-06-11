@@ -72,54 +72,47 @@ export const asyncRoutes = [
         name: "MISreads",
         component: () => import("@/views/project/MISreads/index"),
         meta: {
-          title: "统一查询入口",
+          title: "员工信息查询入口",
           icon: "book-reader",
           permissions: ["admin"],
         },
         children: null,
       },
       {
-        path: "MISedits",
-        component: EmptyLayout,
-        name: "MISedits",
+        path: "MISPCMaintain",
+        name: "MISPCMaintain",
+        component: () => import("@/views/project/MISreads/index"),
         meta: {
-          title: "信息录入",
-          icon: "edit",
+          title: "OA电脑维修清单",
+          icon: "chalkboard",
           permissions: ["admin"],
         },
-        children: [
-          {
-            path: "MISFile",
-            name: "MISFile",
-            component: () => import("@/views/project/MISFile/index"),
-            meta: {
-              title: "MIS档案上传",
-              noKeepAlive: true,
-            },
-            children: null,
-          },
-          {
-            path: "MISmobile",
-            name: "MISmobile",
-            component: () => import("@/views/project/MISmobile/index"),
-            meta: {
-              title: "申请功能机",
-              noKeepAlive: true,
-            },
-            children: null,
-          },
-        ],
+        children: null,
       },
+
+      // {
+      //   path: "MISedits",
+      //   component: EmptyLayout,
+      //   name: "MISedits",
+      //   meta: {
+      //     title: "信息录入",
+      //     icon: "edit",
+      //     permissions: ["admin"],
+      //   },
+      //   children: [
+
+      //   ],
+      // },
     ],
   },
   {
-    path: "/OAquick",
+    path: "/MISedits",
     component: Layout,
     redirect: "noRedirect",
-    name: "OAquick",
+    name: "MISedits",
     meta: {
-      title: "OA快速维护",
-      icon: "user-edit",
+      title: "新增MIS记录",
+      icon: "edit",
       permissions: ["admin"],
     },
 
@@ -127,9 +120,10 @@ export const asyncRoutes = [
       {
         path: "MISFile",
         name: "MISFile",
-        component: () => import("@/views/project/MISreads/index"),
+        component: () => import("@/views/project/MISFile/index"),
         meta: {
           title: "MIS档案上传",
+          icon: "file-alt",
           noKeepAlive: true,
         },
         children: null,
@@ -137,9 +131,10 @@ export const asyncRoutes = [
       {
         path: "MISmobile",
         name: "MISmobile",
-        component: () => import("@/views/project/MISreads/index"),
+        component: () => import("@/views/project/MISmobile/index"),
         meta: {
           title: "申请功能机",
+          icon: "mobile",
           noKeepAlive: true,
         },
         children: null,

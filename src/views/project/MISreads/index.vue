@@ -33,6 +33,7 @@
             </el-form-item>
             <el-form-item label="请填入员工信息" prop="empText">
               <el-input
+                id="empText"
                 v-model="MISReadsForm.empText"
                 type="textarea"
               ></el-input>
@@ -231,12 +232,13 @@
                     <el-button
                       icon="el-icon-edit"
                       size="mini"
-                      @click="alert(scope.row.empNum)"
+                      @click="updatePhoneRow(scope.row)"
                     ></el-button>
                     <el-button
                       type="danger"
                       icon="el-icon-delete-solid"
                       size="mini"
+                      @click="deletePhoneRow(scope.row)"
                     ></el-button>
                   </template>
                 </el-table-column>
@@ -270,6 +272,23 @@
         <img :src="fileUrl" />
       </div>
     </el-dialog>
+    <!-- 修改功能机记录弹出框 -->
+    <el-dialog
+      title="修改功能机记录"
+      :visible.sync="updatePhoneVisible"
+      :before-close="updatePhoneClose"
+      width="30%"
+    >
+      <div>
+        <mobile-form
+          ref="mobileForm"
+          :mobile-data="updataPhoneData"
+          :parent="'MISreads'"
+          @closedialog="updatePhoneClose"
+          @RefreshTable="refreshTable(phonesData)"
+        ></mobile-form>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -280,10 +299,14 @@ import {
   getPhonesData,
   openFilesUrl,
 } from "@/api/MISreads";
+import { deletePhonesData } from "@/api/update";
 import _ from "lodash";
+import mobileForm from "@/components/MIS/mobileForm";
 export default {
   name: "Misreads",
-  components: {},
+  components: {
+    mobileForm,
+  },
   data() {
     return {
       MISReadsForm: {
@@ -317,12 +340,43 @@ export default {
       // 图片弹出框
       fileVisible: false,
       fileUrl: "",
+      // 修改功能机记录弹出框
+      updatePhoneVisible: false,
+      updataPhoneData: {},
     };
   },
   created() {},
   mounted() {},
   methods: {
-    // OA权限申请记录 分页数量
+    // 修改功能机记录 关闭前
+    updatePhoneClose() {
+      this.updataPhoneData = {};
+      this.updatePhoneVisible = false;
+    },
+    // 更新 功能机发放记录 行
+    updatePhoneRow(row) {
+      this.updatePhoneVisible = true;
+      const data = _.cloneDeep(row);
+      this.updataPhoneData = data;
+    },
+    // 删除 功能机发放记录 行
+    deletePhoneRow(row) {
+      this.$confirm("此操作将永久删除该记录, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.deletePhonesData(row.id);
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
+    },
+    // 功能机发放记录 分页数量
     phonesDataSizeChange(val) {
       this.getPhonesData({
         empText: this.phonesData.searchHistroy,
@@ -330,7 +384,7 @@ export default {
         pageSize: val,
       });
     },
-    // OA权限申请记录 当前页
+    // 功能机发放记录 当前页
     phonesDataCurrentChange(val) {
       this.getPhonesData({
         empText: this.phonesData.searchHistroy,
@@ -386,8 +440,7 @@ export default {
         // 空input return
         if (!validate) return false;
         // 深拷贝数据
-        const searchData = _.cloneDeep(this.MISReadsForm);
-        searchData.empText = searchData.empText.split("\n");
+        const searchData = this.returnSearchData();
         // 加载动画
         this.loading.OAMISData = true;
         this.loading.filesData = true;
@@ -409,6 +462,23 @@ export default {
             html + "<span class='newTip' style='color:red'>*</span>";
         }
       }
+    },
+    // 处理待提交的表单数据
+    returnSearchData(form) {
+      // 深拷贝数据
+      const searchData = _.cloneDeep(this.MISReadsForm);
+      searchData.empText = searchData.empText.split("\n");
+      if (form) {
+        searchData.page = form.page;
+        searchData.pageSize = form.pageSize;
+      }
+
+      return searchData;
+    },
+    // 刷新单个table
+    refreshTable(from) {
+      let searchData = this.returnSearchData(from);
+      this.getPhonesData(searchData);
     },
     /**
      * 网络请求
@@ -473,6 +543,15 @@ export default {
           this.phonesData = "";
         });
     },
+    // 删除功能机一行记录
+    deletePhonesData(data) {
+      deletePhonesData(data).then((res) => {
+        if (res.code === 200) {
+          this.$message("success", res.msg);
+          this.refreshTable(this.phonesData);
+        }
+      });
+    },
   },
 };
 </script>
@@ -485,7 +564,7 @@ export default {
       height: 708px;
     }
 
-    .el-textarea__inner {
+    #empText {
       width: 100%;
       height: 550px;
     }
