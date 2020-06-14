@@ -81,7 +81,7 @@ export const asyncRoutes = [
       {
         path: "MISPCMaintain",
         name: "MISPCMaintain",
-        component: () => import("@/views/project/MISreads/index"),
+        component: () => import("@/views/project/MISPCMaintain/index"),
         meta: {
           title: "OA电脑维修清单",
           icon: "chalkboard",
@@ -149,7 +149,7 @@ export const asyncRoutes = [
 ];
 
 const router = new VueRouter({
-  mode: "history",
+  // mode: "history",
   scrollBehavior: () => ({
     y: 0,
   }),
@@ -158,7 +158,7 @@ const router = new VueRouter({
 
 export function resetRouter() {
   router.matcher = new VueRouter({
-    mode: "history",
+    // mode: "history",
     scrollBehavior: () => ({
       y: 0,
     }),

@@ -132,7 +132,7 @@
                     >
                     <el-tag
                       v-if="
-                        scope.row.XmlData.sqlb_wx === true ||
+                        scope.row.XmlData.sqlb_wx === '微信' ||
                         String(scope.row.XmlData.text_qt).indexOf('微信') !== -1
                       "
                       type="success"
@@ -166,6 +166,7 @@
             </el-tab-pane>
             <el-tab-pane label="纸质档案记录">
               <el-table
+                v-loading="loading.filesData"
                 :data="filesData.data"
                 style="width: 100%;"
                 border
@@ -182,6 +183,7 @@
             </el-tab-pane>
             <el-tab-pane label="功能机领取记录">
               <el-table
+                v-loading="loading.phonesData"
                 :data="phonesData.data"
                 style="width: 100%;"
                 border
@@ -436,7 +438,7 @@ export default {
     },
     // 提交查询
     submitEmpText() {
-      this.$refs.MISReadsForm.validate((validate) => {
+      this.$refs.MISReadsForm.validate(async (validate) => {
         // 空input return
         if (!validate) return false;
         // 深拷贝数据
@@ -446,9 +448,21 @@ export default {
         this.loading.filesData = true;
         this.loading.phonesData = true;
         // 执行查询
-        this.getEmpData(searchData);
-        this.getFilesData(searchData);
-        this.getPhonesData(searchData);
+        await this.$notify({
+          title: "等待提醒",
+          message: "纸质文档数据量较大，预计需要10秒钟的时间请耐心等待搜索完成",
+          type: "warning",
+          duration: 10000,
+        });
+        await this.getPhonesData(searchData);
+        await this.getEmpData(searchData);
+        await this.getFilesData(searchData);
+        this.$notify({
+          title: "完成提醒",
+          message: "纸质文档搜索完成",
+          duration: 2000,
+          type: "success",
+        });
       });
     },
     // tag标签页旁边的新数据小星星
@@ -485,8 +499,8 @@ export default {
      */
 
     // 查询OA权限申请记录
-    getEmpData(data) {
-      getEmpData(data)
+    async getEmpData(data) {
+      await getEmpData(data)
         .then((res) => {
           // 记录总行数，不然大于1页时无法返回正确的总数
           if (res.page == 1) {
@@ -506,12 +520,13 @@ export default {
         });
     },
     // 查询纸质档案记录
-    getFilesData(data) {
-      getFilesData(data)
+    async getFilesData(data) {
+      await getFilesData(data)
         .then((res) => {
           // 新查询结果提示
           this.newTips("tab-1");
           this.filesData = res;
+          this.loading.filesData = false;
         })
         .catch((err) => {
           this.newTips("tab-1", "delete");
@@ -526,8 +541,8 @@ export default {
       });
     },
     // 查询功能机发放记录
-    getPhonesData(data) {
-      getPhonesData(data)
+    async getPhonesData(data) {
+      await getPhonesData(data)
         .then((res) => {
           // 记录总行数，不然大于1页时无法返回正确的总数
           if (res.page == 1) {
@@ -536,6 +551,7 @@ export default {
           // 新查询结果提示
           this.newTips("tab-2");
           this.phonesData = res;
+          this.loading.phonesData = false;
         })
         .catch((err) => {
           this.newTips("tab-2", "delete");
@@ -547,7 +563,7 @@ export default {
     deletePhonesData(data) {
       deletePhonesData(data).then((res) => {
         if (res.code === 200) {
-          this.$message("success", res.msg);
+          this.$message.success(res.msg);
           this.refreshTable(this.phonesData);
         }
       });
