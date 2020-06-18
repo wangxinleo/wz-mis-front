@@ -284,7 +284,7 @@ export default {
   mounted() {},
   methods: {
     // 加载缓存数据
-    loadLocalStorage() {
+    async loadLocalStorage() {
       if (
         !localStorage.getItem("loadTime") ||
         // 时间过期触发
@@ -292,17 +292,15 @@ export default {
       ) {
         // 加载图表
         // MIS月度任务分布
-        const p1 = this.getMISProcessList();
+        await this.getMISProcessList();
         // 热门流程
-        const p2 = this.getHotProcess();
+        await this.getHotProcess();
         // 年流程量
-        const p3 = this.getProcessNumByYY();
+        await this.getProcessNumByYY();
         // OA开发日志
-        const p4 = this.getFetchData();
-        Promise.all([p1, p2, p3, p4]).then((res) => {
-          // 等待异步完成触发
-          localStorage.setItem("loadTime", Date.now() + 60 * 60 * 1000);
-        });
+        await this.getFetchData();
+        console.log(5);
+        localStorage.setItem("loadTime", Date.now() + 60 * 60 * 1000);
       } else {
         // 加载缓存的数据
         // MIS月度任务分布
@@ -343,37 +341,40 @@ export default {
       this.$baseMessage(`点击了${e.name},这里可以写跳转`);
     },
     // MIS月度任务分布
-    getMISProcessList() {
-      getMISProcessList().then((res) => {
+    async getMISProcessList() {
+      await getMISProcessList().then((res) => {
         // 呈现数据
         this.MISprocessCount = res.data;
         //缓存到本地
         this.setlocalData("MISprocessCount", res);
         // 获取总数
         this.MIStaskCount.endVal = res.totalCount;
+        console.log(1);
       });
     },
     // 热门流程
-    getHotProcess() {
-      getHotProcess().then((res) => {
+    async getHotProcess() {
+      await getHotProcess().then((res) => {
         this.hotProcess = res.data;
         // 缓存到本地
         this.setlocalData("hotProcess", res);
         // 计算总数
         this.processCount.endVal = res.totalCount;
+        console.log(2);
       });
     },
     // 近两年流程归档量对比
-    getProcessNumByYY() {
-      getProcessNumByYY().then((res) => {
+    async getProcessNumByYY() {
+      await getProcessNumByYY().then((res) => {
         this.ProcessNumByYY = res.data;
         // 缓存到本地
         this.setlocalData("ProcessNumByYY", res);
+        console.log(3);
       });
     },
     // OA开发日志
-    getFetchData() {
-      getFetchData().then((res) => {
+    async getFetchData() {
+      await getFetchData().then((res) => {
         res.data.map((item, index) => {
           if (index === res.data.length - 1) {
             item.color = "#0bbd87";
@@ -382,6 +383,7 @@ export default {
         this.activities = res.data;
         // 缓存到本地
         this.setlocalData("activities", res);
+        console.log(4);
       });
     },
   },
