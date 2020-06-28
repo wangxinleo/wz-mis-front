@@ -30,6 +30,15 @@ export function getPhonesData(data) {
     data,
   });
 }
+
+export function getComputersData(data) {
+  return request({
+    url: "/MIS/getComputersData",
+    method: "post",
+    data,
+  });
+}
+
 export function getAreaOption(data) {
   return request({
     url: "/MIS/getAreaOption",

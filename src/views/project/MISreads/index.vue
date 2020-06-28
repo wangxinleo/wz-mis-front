@@ -265,6 +265,55 @@
                 stripe
                 height="560"
               >
+                <el-table-column type="expand">
+                  <template slot-scope="scope">
+                    <el-form
+                      label-position="left"
+                      class="demo-table-expand"
+                      label-width="150px"
+                    >
+                      <el-form-item label="所在部门">
+                        <span>{{ scope.row.section }}</span>
+                      </el-form-item>
+                      <el-form-item label="所任职务">
+                        <span>{{ scope.row.duties }}</span>
+                      </el-form-item>
+                      <el-form-item label="电脑类型">
+                        <span>{{ scope.row.displayer }}</span>
+                      </el-form-item>
+                      <el-form-item label="电脑品牌">
+                        <span>{{ scope.row.master }}</span>
+                      </el-form-item>
+                      <el-form-item label="处理器">
+                        <span>{{ scope.row.cpu }}</span>
+                      </el-form-item>
+                      <el-form-item label="内存">
+                        <span>{{ scope.row.ram }}</span>
+                      </el-form-item>
+                      <el-form-item label="显示器">
+                        <span>{{ scope.row.display }}</span>
+                      </el-form-item>
+                      <el-form-item label="硬盘">
+                        <span>{{ scope.row.disk }}</span>
+                      </el-form-item>
+                      <el-form-item label="上一任使用人">
+                        <span>{{ scope.row.olduser }}</span>
+                      </el-form-item>
+                      <el-form-item label="建档信息">
+                        <span>{{ scope.row.comment }}</span>
+                      </el-form-item>
+                    </el-form>
+                  </template>
+                </el-table-column>
+                <el-table-column type="index" label="#">
+                  <template slot-scope="scope">
+                    {{
+                      (computersData.page - 1) * computersData.pageSize +
+                      scope.$index +
+                      1
+                    }}
+                  </template>
+                </el-table-column>
                 <el-table-column prop="number" label="电脑编号">
                 </el-table-column>
                 <el-table-column prop="ip" label="ip地址">
@@ -289,7 +338,28 @@
                 ></el-table-column>
                 <el-table-column prop="user" label="用户"></el-table-column>
                 <el-table-column prop="userid" label="工号"></el-table-column>
+                <el-table-column prop="found" label="建档"></el-table-column>
+                <el-table-column prop="amend" label="修订"></el-table-column>
+                <el-table-column
+                  prop="factory"
+                  label="所属厂"
+                ></el-table-column>
+                <el-table-column prop="time" label="更新时间">
+                  <template slot-scope="scope">
+                    {{ scope.row.time.substr(0, 10) }}
+                  </template>
+                </el-table-column>
               </el-table>
+              <el-pagination
+                :current-page="computersData.page"
+                :page-sizes="[10, 20, 50, 100]"
+                :page-size="computersData.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total.computersData"
+                @size-change="computersDataSizeChange"
+                @current-change="computersDataCurrentChange"
+              >
+              </el-pagination>
             </el-tab-pane>
           </el-tabs>
         </el-card>
@@ -331,13 +401,14 @@ import {
   getEmpData,
   getFilesData,
   getPhonesData,
+  getComputersData,
   openFilesUrl,
 } from "@/api/MISreads";
 import { deletePhonesData } from "@/api/update";
 import _ from "lodash";
 import mobileForm from "@/components/MIS/mobileForm";
 export default {
-  name: "Misreads",
+  name: "MISreads",
   components: {
     mobileForm,
   },
@@ -360,276 +431,7 @@ export default {
       // 功能机领取记录
       phonesData: {},
       // 电脑档案记录
-      computersData: {
-        code: 200,
-        msg: "查询电脑档案记录成功",
-        page: 1,
-        pageSize: 10,
-        searchHistroy: [123, "王"],
-        totalCount: 96,
-        data: [
-          {
-            id: 4092,
-            number: "M017001118",
-            ip: "172.17.1.118",
-            ip2: "",
-            ip3: "",
-            ip4: "",
-            category: "办公电脑",
-            section: "品质专项部",
-            user: "王海哲",
-            userid: "32075",
-            duties: "工程师",
-            displayer: "液晶",
-            print_ip: "",
-            olduser: "丘伟华",
-            comment: "原深圳编号W016001040",
-            found: "黄海生",
-            amend: "黄海生",
-            factory: "梅州志浩",
-            master: "",
-            cpu: "",
-            ram: "",
-            display: "",
-            disk: "",
-            time: "2020-06-18T19:22:44.000Z",
-          },
-          {
-            id: 4407,
-            number: "D018020056",
-            ip: "172.18.20.56",
-            ip2: "",
-            ip3: "",
-            ip4: "",
-            category: "办公电脑",
-            section: "工艺部",
-            user: "王远",
-            userid: "A2000215",
-            duties: "总监",
-            displayer: "华硕笔记本",
-            print_ip: "",
-            olduser: "梁耀荣",
-            comment: "",
-            found: "池兰芳",
-            amend: "罗颖聪",
-            factory: "东莞FPC",
-            master: "",
-            cpu: "",
-            ram: "",
-            display: "",
-            disk: "",
-            time: "2020-06-08T17:54:41.000Z",
-          },
-          {
-            id: 1790,
-            number: "D018002176",
-            ip: "172.18.2.176",
-            ip2: "",
-            ip3: "",
-            ip4: "",
-            category: "办公电脑",
-            section: "生产部",
-            user: "王彦雷",
-            userid: "816102",
-            duties: "员工",
-            displayer: "",
-            print_ip: "",
-            olduser: "刘敬平",
-            comment: "HDI文字",
-            found: "池兰芳",
-            amend: "罗颖聪",
-            factory: "东莞HDI",
-            master: "",
-            cpu: "奔腾 2.2GHZ",
-            ram: "2G",
-            display: "",
-            disk: "250G",
-            time: "2020-06-04T16:44:07.000Z",
-          },
-          {
-            id: 1785,
-            number: "M017003076",
-            ip: "172.17.3.76",
-            ip2: "",
-            ip3: "",
-            ip4: "",
-            category: "办公电脑",
-            section: "品质专项部",
-            user: "王海鹏",
-            userid: "302677",
-            duties: "工程师",
-            displayer: "液晶19寸",
-            print_ip: "",
-            olduser: "",
-            comment: "已封USB",
-            found: "黄海生",
-            amend: "黄海生",
-            factory: "梅州志浩",
-            master: "",
-            cpu: "",
-            ram: "",
-            display: "",
-            disk: "",
-            time: "2020-06-02T18:47:05.000Z",
-          },
-          {
-            id: 3844,
-            number: "D018005180",
-            ip: "172.18.5.180",
-            ip2: "",
-            ip3: "",
-            ip4: "",
-            category: "办公电脑",
-            section: "测试技术部",
-            user: "王永霞",
-            userid: "84731",
-            duties: "主管",
-            displayer: "液晶显示器",
-            print_ip: "",
-            olduser: "李水根",
-            comment: "有加密狗，可考入",
-            found: "梁亮",
-            amend: "池兰芳",
-            factory: "东莞HDI",
-            master: "",
-            cpu: "",
-            ram: "",
-            display: "",
-            disk: "",
-            time: "2020-06-01T18:19:30.000Z",
-          },
-          {
-            id: 4537,
-            number: "M017000237",
-            ip: "172.17.0.237",
-            ip2: "",
-            ip3: "",
-            ip4: "",
-            category: "办公电脑",
-            section: "市场专项",
-            user: "王凤兰",
-            userid: "",
-            duties: "工程师",
-            displayer: "",
-            print_ip: "",
-            olduser: "",
-            comment: "",
-            found: "刘国龙",
-            amend: "",
-            factory: "梅州五株",
-            master: "",
-            cpu: "",
-            ram: "",
-            display: "",
-            disk: "",
-            time: "2020-06-01T17:02:06.000Z",
-          },
-          {
-            id: 4523,
-            number: "D018003102",
-            ip: "172.18.3.102",
-            ip2: "",
-            ip3: "",
-            ip4: "",
-            category: "办公电脑",
-            section: "生产部",
-            user: "王同梅",
-            userid: "827024",
-            duties: "文员",
-            displayer: "",
-            print_ip: "",
-            olduser: "",
-            comment: "电测",
-            found: "刘龙辉",
-            amend: "",
-            factory: "东莞高多层",
-            master: "",
-            cpu: "",
-            ram: "",
-            display: "",
-            disk: "",
-            time: "2020-05-19T16:49:01.000Z",
-          },
-          {
-            id: 2075,
-            number: "D018001197",
-            ip: "172.18.1.197",
-            ip2: "",
-            ip3: "",
-            ip4: "",
-            category: "办公电脑",
-            section: "SMT部",
-            user: "王美万",
-            userid: "A2000005",
-            duties: "经理",
-            displayer: "液晶显示器",
-            print_ip: "",
-            olduser: "邓大伟",
-            comment: "生产",
-            found: "池兰芳",
-            amend: "池兰芳",
-            factory: "东莞FPC",
-            master: "HP",
-            cpu: "intel G1840 2.8GHZ",
-            ram: "4G",
-            display: "",
-            disk: "250G",
-            time: "2020-05-14T18:44:34.000Z",
-          },
-          {
-            id: 2369,
-            number: "D018003109",
-            ip: "172.18.3.109",
-            ip2: "",
-            ip3: "",
-            ip4: "",
-            category: "办公电脑",
-            section: "工程部",
-            user: "王晶",
-            userid: "821063",
-            duties: "工程师",
-            displayer: "液晶显示器",
-            print_ip: "",
-            olduser: "李小军",
-            comment: "新机",
-            found: "邹思鹏",
-            amend: "池兰芳",
-            factory: "东莞HDI",
-            master: "",
-            cpu: "",
-            ram: "",
-            display: "",
-            disk: "",
-            time: "2020-05-07T01:27:34.000Z",
-          },
-          {
-            id: 4513,
-            number: "D018006215",
-            ip: "172.18.6.215",
-            ip2: "",
-            ip3: "",
-            ip4: "",
-            category: "办公电脑",
-            section: "人力资源部",
-            user: "王红丽",
-            userid: "820423",
-            duties: "文员",
-            displayer: "液晶",
-            print_ip: "",
-            olduser: "",
-            comment: "",
-            found: "罗颖聪",
-            amend: "罗颖聪",
-            factory: "东莞集团",
-            master: "",
-            cpu: "",
-            ram: "",
-            display: "",
-            disk: "",
-            time: "2020-05-04T00:57:27.000Z",
-          },
-        ],
-      },
+      computersData: {},
       // 分页总量
       total: {
         OAMISData: 0,
@@ -699,6 +501,22 @@ export default {
         pageSize: this.phonesData.pageSize,
       });
     },
+    // 电脑档案记录 分页数量
+    computersDataSizeChange(val) {
+      this.getComputersData({
+        empText: this.computersData.searchHistroy,
+        page: this.computersData.page,
+        pageSize: val,
+      });
+    },
+    // 电脑档案记录 当前页
+    computersDataCurrentChange(val) {
+      this.getComputersData({
+        empText: this.computersData.searchHistroy,
+        page: val,
+        pageSize: this.computersData.pageSize,
+      });
+    },
     // OA权限申请记录 分页数量
     OAMISDataSizeChange(val) {
       this.getEmpData({
@@ -748,26 +566,11 @@ export default {
         if (!validate) return false;
         // 深拷贝数据
         const searchData = this.returnSearchData();
-        // 加载动画
-        this.loading.OAMISData = true;
-        this.loading.filesData = true;
-        this.loading.phonesData = true;
         // 执行查询
-        await this.$notify({
-          title: "等待提醒",
-          message: "纸质文档数据量较大，预计需要10秒钟的时间请耐心等待搜索完成",
-          type: "warning",
-          duration: 10000,
-        });
         await this.getPhonesData(searchData);
         await this.getEmpData(searchData);
         await this.getFilesData(searchData);
-        this.$notify({
-          title: "完成提醒",
-          message: "纸质文档搜索完成",
-          duration: 2000,
-          type: "success",
-        });
+        await this.getComputersData(searchData);
       });
     },
     // tag标签页旁边的新数据小星星
@@ -805,6 +608,8 @@ export default {
 
     // 查询OA权限申请记录
     async getEmpData(data) {
+      // 加载动画
+      this.loading.OAMISData = true;
       await getEmpData(data)
         .then((res) => {
           // 记录总行数，不然大于1页时无法返回正确的总数
@@ -817,6 +622,12 @@ export default {
           this.OAMISData = res;
           // 关闭加载动画
           this.loading.OAMISData = false;
+          this.$notify.close();
+          // 查询成功提示
+          this.$notify.success({
+            title: "查询成功",
+            message: "OA权限申请记录已成功返回数据",
+          });
         })
         .catch((err) => {
           this.newTips("tab-0", "delete");
@@ -826,12 +637,19 @@ export default {
     },
     // 查询纸质档案记录
     async getFilesData(data) {
+      // 加载动画
+      this.loading.filesData = true;
       await getFilesData(data)
         .then((res) => {
           // 新查询结果提示
           this.newTips("tab-1");
           this.filesData = res;
           this.loading.filesData = false;
+          // 查询成功提示
+          this.$notify.success({
+            title: "查询成功",
+            message: "纸质档案记录已成功返回数据",
+          });
         })
         .catch((err) => {
           this.newTips("tab-1", "delete");
@@ -847,6 +665,8 @@ export default {
     },
     // 查询功能机发放记录
     async getPhonesData(data) {
+      // 加载动画
+      this.loading.phonesData = true;
       await getPhonesData(data)
         .then((res) => {
           // 记录总行数，不然大于1页时无法返回正确的总数
@@ -857,6 +677,11 @@ export default {
           this.newTips("tab-2");
           this.phonesData = res;
           this.loading.phonesData = false;
+          // 查询成功提示
+          this.$notify.success({
+            title: "查询成功",
+            message: "功能机发放记录已成功返回数据",
+          });
         })
         .catch((err) => {
           this.newTips("tab-2", "delete");
@@ -872,6 +697,34 @@ export default {
           this.refreshTable(this.phonesData);
         }
       });
+    },
+    // 查询电脑档案记录
+    async getComputersData(data) {
+      // 加载动画
+      this.loading.computersData = true;
+      await getComputersData(data)
+        .then((res) => {
+          // 记录总行数，不然大于1页时无法返回正确的总数
+          if (res.page == 1) {
+            this.total.computersData = res.totalCount;
+          }
+          // 新查询结果提示
+          this.newTips("tab-3");
+          // 呈现数据
+          this.computersData = res;
+          // 关闭加载动画
+          this.loading.computersData = false;
+          // 查询成功提示
+          this.$notify.success({
+            title: "查询成功",
+            message: "电脑档案记录已成功返回数据",
+          });
+        })
+        .catch((err) => {
+          this.newTips("tab-3", "delete");
+          this.loading.computersData = false;
+          this.computersData = "";
+        });
     },
   },
 };

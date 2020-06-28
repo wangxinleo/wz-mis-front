@@ -115,7 +115,6 @@ export const asyncRoutes = [
       icon: "edit",
       permissions: ["admin"],
     },
-
     children: [
       {
         path: "MISFile",
