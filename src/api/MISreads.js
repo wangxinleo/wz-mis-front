@@ -53,3 +53,11 @@ export function getDeptOption(data) {
     data,
   });
 }
+
+export function getMISPCMaintainData(data) {
+  return request({
+    url: "/MIS/getMISPCMaintainData",
+    method: "post",
+    data,
+  });
+}

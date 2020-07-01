@@ -31,6 +31,12 @@
                 </el-col>
               </el-row>
             </el-form-item>
+            <el-checkbox-group v-model="readItem" size="mini">
+              <el-checkbox label="0" checked>OA权限</el-checkbox>
+              <el-checkbox label="1" checked>纸质档案</el-checkbox>
+              <el-checkbox label="2" checked>功 能 机</el-checkbox>
+              <el-checkbox label="3" checked>电脑档案</el-checkbox>
+            </el-checkbox-group>
             <el-form-item label="请填入员工信息" prop="empText">
               <el-input
                 id="empText"
@@ -302,6 +308,9 @@
                       <el-form-item label="建档信息">
                         <span>{{ scope.row.comment }}</span>
                       </el-form-item>
+                      <el-form-item label="最后更新日期">
+                        <span>{{ scope.row.time }}</span>
+                      </el-form-item>
                     </el-form>
                   </template>
                 </el-table-column>
@@ -314,9 +323,14 @@
                     }}
                   </template>
                 </el-table-column>
-                <el-table-column prop="number" label="电脑编号">
+                <el-table-column prop="number" label="电脑编号" width="110">
                 </el-table-column>
-                <el-table-column prop="ip" label="ip地址">
+                <el-table-column
+                  prop="ip"
+                  label="ip地址"
+                  :show-overflow-tooltip="true"
+                  width="510"
+                >
                   <template slot-scope="scope">
                     <el-tag v-if="scope.row.ip" effect="dark">
                       {{ scope.row.ip }}
@@ -344,11 +358,6 @@
                   prop="factory"
                   label="所属厂"
                 ></el-table-column>
-                <el-table-column prop="time" label="更新时间">
-                  <template slot-scope="scope">
-                    {{ scope.row.time.substr(0, 10) }}
-                  </template>
-                </el-table-column>
               </el-table>
               <el-pagination
                 :current-page="computersData.page"
@@ -452,6 +461,8 @@ export default {
       // 修改功能机记录弹出框
       updatePhoneVisible: false,
       updataPhoneData: {},
+      // 勾选查询
+      readItem: [],
     };
   },
   created() {},
@@ -567,10 +578,26 @@ export default {
         // 深拷贝数据
         const searchData = this.returnSearchData();
         // 执行查询
-        await this.getPhonesData(searchData);
-        await this.getEmpData(searchData);
-        await this.getFilesData(searchData);
-        await this.getComputersData(searchData);
+        const loading = this.$loading({
+          lock: true,
+          text: "Loading",
+          spinner: "el-icon-loading",
+          background: "rgba(0, 0, 0, 0.7)",
+        });
+        if (this.readItem.indexOf("2") > -1) {
+          await this.getPhonesData(searchData);
+        }
+        if (this.readItem.indexOf("0") > -1) {
+          await this.getEmpData(searchData);
+        }
+        if (this.readItem.indexOf("1") > -1) {
+          await this.getFilesData(searchData);
+        }
+        if (this.readItem.indexOf("3") > -1) {
+          await this.getComputersData(searchData);
+        }
+
+        loading.close();
       });
     },
     // tag标签页旁边的新数据小星星
@@ -627,6 +654,7 @@ export default {
           this.$notify.success({
             title: "查询成功",
             message: "OA权限申请记录已成功返回数据",
+            duration: 22000,
           });
         })
         .catch((err) => {
@@ -649,6 +677,7 @@ export default {
           this.$notify.success({
             title: "查询成功",
             message: "纸质档案记录已成功返回数据",
+            duration: 22000,
           });
         })
         .catch((err) => {
@@ -681,6 +710,7 @@ export default {
           this.$notify.success({
             title: "查询成功",
             message: "功能机发放记录已成功返回数据",
+            duration: 22000,
           });
         })
         .catch((err) => {
@@ -718,6 +748,7 @@ export default {
           this.$notify.success({
             title: "查询成功",
             message: "电脑档案记录已成功返回数据",
+            duration: 22000,
           });
         })
         .catch((err) => {
@@ -740,7 +771,7 @@ export default {
 
     #empText {
       width: 100%;
-      height: 550px;
+      height: 530px;
     }
 
     .el-tabs {
