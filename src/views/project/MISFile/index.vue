@@ -5,7 +5,7 @@
         <el-card>
           <el-upload
             ref="upload"
-            action="http://172.18.8.117:8089/api/private/v1/upload/MISFile"
+            action="http://localhost:8099/api/private/v1/upload/MISFile"
             :before-upload="beforeUpload"
             :file-list="fileList"
             list-type="picture"

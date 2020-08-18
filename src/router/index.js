@@ -79,6 +79,17 @@ export const asyncRoutes = [
         children: null,
       },
       {
+        path: "EmpInShow",
+        name: "EmpInShow",
+        component: () => import("@/views/project/EmpInShow/index"),
+        meta: {
+          title: "电脑派发资格校验",
+          icon: "book-reader",
+          permissions: ["admin"],
+        },
+        children: null,
+      },
+      {
         path: "MISPCMaintain",
         name: "MISPCMaintain",
         component: () => import("@/views/project/MISPCMaintain/index"),
